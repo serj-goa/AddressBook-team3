@@ -126,8 +126,8 @@ def command_birth(user_data_list: list) -> None:
     user_message = get_message(user_data_list)  #type: str
     contact_name = get_contact_name(user_message)  #type: str
 
-    # if contact_name not in phonebook:
-    #     raise KeyError
+    if contact_name not in phonebook:
+        raise KeyError
 
     record = phonebook[contact_name]  #type: Record
 

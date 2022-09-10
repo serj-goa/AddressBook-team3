@@ -1,7 +1,6 @@
 from collections import UserDict
 from datetime import datetime
 from typing import List
-from unittest import result
 
 
 class AddressBook(UserDict):
@@ -36,11 +35,6 @@ class AddressBook(UserDict):
                 phones.append(obj_phone.value)  #type: str
 
             result = (name, phones, birth)
-
-            # if record.birthday:  #type: Birthday
-            #     result = f'Contact name: {name}, phones: {", ".join(phones)}, birthday: {record.birthday}'
-            # else:
-            #     result = f'Contact name: {name}, phones: {", ".join(phones)}'
 
             yield result
 
