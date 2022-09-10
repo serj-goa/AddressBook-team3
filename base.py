@@ -6,27 +6,29 @@ from pickle import load, dump
 
 def dump_base(file_path: Path, db: dict) -> str:
 
-    if file_path.is_file():
-
+    try:
         with open(file_path, 'wb') as fh:
             dump(db, fh)
 
-        return 'Phonebook saved.'
+    except Exception as error:
+        print(error)
 
-    return 'Phonebook don`t saved.'
+    return 'Phonebook saved.'
 
 
 def load_base(file_path: Path) -> AddressBook:
 
-    if file_path.is_file():
-
+    try:
         with open(file_path, 'rb') as fh:
             phonebook = load(fh)
 
-        return phonebook
-
-    else:
+    except FileNotFoundError:
         return AddressBook()
+
+    except EOFError:
+        return AddressBook()
+
+    return phonebook
 
 
 if __name__ == '__main__':
