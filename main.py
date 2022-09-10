@@ -1,7 +1,8 @@
 from base import dump_base, load_base
-from phonebook import AddressBook, Birthday, Name, Phone, Record
+from phonebook import AddressBook, Birthday, Email, Name, Phone, Record
 
 from pathlib import Path
+from re import findall
 from typing import List
 
 
@@ -53,21 +54,23 @@ def command_add(user_data_list: list) -> str:
         raise ValueError
 
     contact_name = get_contact_name(user_message)  #type: str
-    phones = get_contact_phone(user_message).split()  #type: List[str]
-    birth = get_contact_birthday(user_message)  #type: str
+    phones = get_contact_phone(user_message)  #type: List[str]
+    birth = get_contact_birthday(user_message)  #type: str or None
+    emails = get_contact_email(user_message)  #type: List[str]
 
     if not phones:
         raise ValueError
 
     if contact_name not in phonebook:
 
-        if birth:
-            birth = Birthday(birth)
-
         new_contact_name = Name(contact_name)
         new_contact_phones = [Phone(ph) for ph in phones]
+        new_contact_birth = Birthday(birth) if birth else None
+        new_contact_emails = [Email(eml) for eml in emails] if emails else None
 
-        new_record = Record(new_contact_name, new_contact_phones, birth)
+        new_record = Record(name=new_contact_name, phone=new_contact_phones,
+                            birthday=new_contact_birth, email=new_contact_emails)
+        # new_record = Record(name=new_contact_name, phone=new_contact_phones, birthday=birth)
         phonebook[new_record.name.value] = new_record
         return contact_name
 
@@ -87,6 +90,10 @@ def command_add(user_data_list: list) -> str:
 
     if birth is not None:
         exist_record.add_birthday(Birthday(birth))
+
+    for eml in emails:
+        if is_uniq_email(exist_record, eml):
+            exist_record.add_email(Email(eml))
 
     return contact_name
 
@@ -181,6 +188,7 @@ def command_close_program(_) -> str:
     print('Good bye!\n')
     return 'quit'
 
+
 def command_del(user_data_list: list) -> str:
     """
     Remove contact from the phone book.
@@ -209,8 +217,9 @@ def command_find(user_data_list: list):
     partial_matching = []
 
     for _ in range(len(phonebook)):
-        name, phones, birth = next(iter_phonebook)
+        name, phones, birth, email = next(iter_phonebook)
         str_phones = ' '.join(phones)
+        str_email = ' '.join(email) if email else ''
         cnt = 0
 
         for user_kw in some_data:
@@ -219,34 +228,42 @@ def command_find(user_data_list: list):
                 cnt += 1
             elif user_kw in str_phones:
                 cnt += 1
+            elif user_kw in str_email:
+                cnt += 1
 
         if cnt == len(some_data):
-            full_match.append((name, phones, birth))
+            full_match.append((name, phones, birth, email))
         elif cnt > 0:
-            partial_matching.append((name, phones, birth))
+            partial_matching.append((name, phones, birth, email))
+
+    # if full_match or partial_matching:
+    #
+    #     display_matching = '\nFull matching:' if len(full_match) > 0 else '\nPartial matching:'
+    #     arr_matching = full_match if len(full_match) > 0 else partial_matching
+    #
+    #     print(display_matching)
+    #
+    #     for contact in arr_matching:
+    #         result = get_record_for_print(contact)
+    #         print(result)
 
     if len(full_match) > 0:
-        print('\nFull matching:')
+        print('\nMatch for all keys:')
 
         for contact in full_match:
-            name, phones, birthday = contact                
-            
-            result = get_record_for_print(name, phones, birthday)
-
+            result = get_record_for_print(contact)
             print(result)
 
     elif len(partial_matching) > 0:
-        print('\nPartial matching:')
+        print('\nMatch on some keys:')
 
         for contact in partial_matching:
-            name, phones, birthday = contact
-            
-            result = get_record_for_print(name, phones, birthday)
-
+            result = get_record_for_print(contact)
             print(result)
     else:
         print('Nothing was found according to your request.')
     print()
+
 
 def command_hello(_) -> None:
     print('How can I help you?\n')
@@ -297,8 +314,8 @@ def command_show_all(_) -> None:
     user_choice = None
 
     while cnt < limit_iter:
-        name, phones, birthday = next(iter_phonebook)
-        result = get_record_for_print(name, phones, birthday)
+        record_data = next(iter_phonebook)
+        result = get_record_for_print(record_data)
         print(result)
 
         cnt += 1
@@ -330,6 +347,7 @@ def get_command(some_data: list) -> str:
     return user_command
 
 
+@input_error
 def get_contact_birthday(some_string: str) -> str or None:
     """
     Getting the date of birth from the data transmitted by the user.
@@ -345,6 +363,15 @@ def get_contact_birthday(some_string: str) -> str or None:
                 birth = clear_data
 
     return birth
+
+
+@input_error
+def get_contact_email(some_string: str) -> list:
+    """
+    Getting the date of email from the data transmitted by the user.
+    """
+    emails = findall(r"[a-zA-Z][\w\.]+@[a-zA-Z]{2,}\.[a-zA-Z]{2,}", some_string)
+    return emails
 
 
 @input_error
@@ -375,23 +402,26 @@ def get_contact_phone(some_string: str) -> str:
     """
     Getting the phone from the data transmitted by the user.
     """
-    data_lst = some_string.split()
+    clear_data = normalize_msg(some_string)
+    result = findall(r'(?:\+\d{2})?\d{3,4}\D?\d{3}\D?\d{3}', clear_data)
+    return result
+    # data_lst = some_string.split()
+    #
+    # if len(data_lst) > 1:
+    #     phone_data = []
+    #
+    #     for data in data_lst[::-1]:
+    #         clear_data = normalize_msg(data)
+    #         if clear_data.isdigit() and len(clear_data) >= 10:
+    #             phone_data.insert(0, data)
+    #         elif clear_data.isdigit():
+    #             continue
+    #         else:
+    #             break
+    #
+    #     phones = ' '.join(phone_data)
 
-    if len(data_lst) > 1:
-        phone_data = []
-
-        for data in data_lst[::-1]:
-            clear_data = normalize_msg(data)
-            if clear_data.isdigit() and len(clear_data) >= 10:
-                phone_data.insert(0, data)
-            elif clear_data.isdigit():
-                continue
-            else:
-                break
-
-        phones = ' '.join(phone_data)
-
-    return phones
+    # return phones
 
 
 @input_error
@@ -406,14 +436,26 @@ def get_message(some_data: list) -> str:
     return user_message
 
 
-def get_record_for_print(name: str, phones: list, birthday: str = None) -> str:
-    if birthday:
-        result = f'Contact name: {name}, phones: {", ".join(phones)}, birthday: {birthday}'
+def get_record_for_print(record_data: tuple) -> str:
+    name = record_data[0]
+    phones = f' | phones: {", ".join(record_data[1])}' if record_data[1] else ''
+    birthday = f' | birthday: {record_data[2]}' if record_data[2] else ''
+    emails = f' | email: {", ".join(record_data[3])}' if record_data[3] else ''
 
-    else:
-        result = f'Contact name: {name}, phones: {", ".join(phones)}'
+    result = f'{name}{phones}{birthday}{emails}'
 
     return result
+
+
+def is_uniq_email(exist_record: Record, email: str) -> bool:
+    """
+    Checks the uniqueness of a contact's phone number.
+    """
+    for eml in exist_record.email:  #type: List[Email]
+        if email == eml.value:
+            return False
+    return True
+
 
 
 def is_uniq_phone(exist_record: Record, phone: str) -> bool:
@@ -430,7 +472,7 @@ def normalize_msg(message: str) -> str:
     """
     Clears a string of unnecessary characters.
     """
-    symbols = '-+=_./\\'
+    symbols = '-=_./\\'
     for symb in symbols:
         message = message.replace(symb, '')
     return message
