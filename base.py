@@ -11,7 +11,7 @@ def dump_base(file_path: Path, db: dict) -> str:
             dump(db, fh)
 
     except Exception as error:
-        print(error)
+        return error
 
     return 'Phonebook saved.'
 
