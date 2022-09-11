@@ -213,12 +213,11 @@ def command_find(user_data_list: list):
     """
     iter_phonebook = phonebook.iterator()
     some_data = ' '.join(user_data_list[1:]).split()
-    full_match = []
-    partial_matching = []
+    search_matching = []
 
     for _ in range(len(phonebook)):
         name, phones, birth, email = next(iter_phonebook)
-        str_phones = ' '.join(phones)
+        str_phones = ' '.join(phones) if phones else ''
         str_email = ' '.join(email) if email else ''
         cnt = 0
 
@@ -231,38 +230,18 @@ def command_find(user_data_list: list):
             elif user_kw in str_email:
                 cnt += 1
 
-        if cnt == len(some_data):
-            full_match.append((name, phones, birth, email))
-        elif cnt > 0:
-            partial_matching.append((name, phones, birth, email))
+        if cnt > 0:
+            search_matching.append((name, phones, birth, email))
 
-    # if full_match or partial_matching:
-    #
-    #     display_matching = '\nFull matching:' if len(full_match) > 0 else '\nPartial matching:'
-    #     arr_matching = full_match if len(full_match) > 0 else partial_matching
-    #
-    #     print(display_matching)
-    #
-    #     for contact in arr_matching:
-    #         result = get_record_for_print(contact)
-    #         print(result)
+    if search_matching:
 
-    if len(full_match) > 0:
-        print('\nMatch for all keys:')
-
-        for contact in full_match:
+        for contact in search_matching:
             result = get_record_for_print(contact)
             print(result)
+        print()
 
-    elif len(partial_matching) > 0:
-        print('\nMatch on some keys:')
-
-        for contact in partial_matching:
-            result = get_record_for_print(contact)
-            print(result)
     else:
-        print('Nothing was found according to your request.')
-    print()
+        print('Nothing was found according to your request.\n')
 
 
 def command_hello(_) -> None:
