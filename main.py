@@ -1,4 +1,5 @@
 from base import dump_base, load_base
+from birthlist import get_birthdays_per_week
 from phonebook import AddressBook, Address, Birthday, Email, Name, Phone, Record
 
 from pathlib import Path
@@ -179,6 +180,11 @@ def command_birth(user_data_list: list) -> None:
         print(f'Today is {contact_name}\'s birthday.\n')
     else:
         print(f'There are {days_to_birth} days left until {contact_name}\'s birthday.\n')
+
+
+@input_error
+def command_birth_week(user_data_list: list) -> None:
+    get_birthdays_per_week(phonebook)
 
 
 @input_error
@@ -534,8 +540,9 @@ if __name__ == '__main__':
         'add address': command_add_address,
         'add birth': command_add_birth, 
         'add': command_add, 
+        'birth week': command_birth_week,
         'birth': command_birth,
-        'change': command_change, 
+        'change': command_change,
         'del': command_del, 
         'find': command_find, 
         'phone': command_phone,
