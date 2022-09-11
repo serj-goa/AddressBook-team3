@@ -1,5 +1,5 @@
 from base import dump_base, load_base
-from phonebook import AddressBook, Birthday, Email, Name, Phone, Record
+from phonebook import AddressBook, Address, Birthday, Email, Name, Phone, Record
 
 from pathlib import Path
 from re import findall
@@ -13,6 +13,8 @@ def input_error(func):
     def inner(*args):
         try:
             return func(*args)
+        except AttributeError:
+            print('Please enter a valid data!\n')
         except KeyError:
             print('Please enter a valid contact name!\n')
         except ValueError:
@@ -70,8 +72,8 @@ def command_add(user_data_list: list) -> str:
 
         new_record = Record(name=new_contact_name, phone=new_contact_phones,
                             birthday=new_contact_birth, email=new_contact_emails)
-        # new_record = Record(name=new_contact_name, phone=new_contact_phones, birthday=birth)
         phonebook[new_record.name.value] = new_record
+
         return contact_name
 
     exist_record = phonebook[contact_name]
@@ -98,9 +100,39 @@ def command_add(user_data_list: list) -> str:
     return contact_name
 
 
+@input_error
+def command_add_address(user_data_list: list) -> str:
+    """
+    Adding a contact address.
+    """
+    user_message = get_message(user_data_list)  # type: str
+
+    contact_name = None
+    contact_addr = None
+
+    if user_message is not None:
+        for name in phonebook.keys():
+            if user_message.startswith(name):
+                contact_name = name
+                contact_addr = user_message.lstrip(name + ' ')
+
+        if contact_name is None:
+            raise KeyError
+
+        if not contact_addr:
+            raise ValueError
+
+        if contact_name and contact_addr:
+            exist_record = phonebook[contact_name]  #type: Record
+            exist_record.add_address(Address(contact_addr))
+
+    return contact_name
+
+
+@input_error
 def command_add_birth(user_data_list: list) -> str:
     """
-    Adding a contact's birthday.
+    Adding a contact birthday.
     """
     if not user_data_list[1]:
         raise KeyError
@@ -216,7 +248,7 @@ def command_find(user_data_list: list):
     search_matching = []
 
     for _ in range(len(phonebook)):
-        name, phones, birth, email = next(iter_phonebook)
+        name, phones, birth, email, addr = next(iter_phonebook)
         str_phones = ' '.join(phones) if phones else ''
         str_email = ' '.join(email) if email else ''
         cnt = 0
@@ -231,7 +263,7 @@ def command_find(user_data_list: list):
                 cnt += 1
 
         if cnt > 0:
-            search_matching.append((name, phones, birth, email))
+            search_matching.append((name, phones, birth, email, addr))
 
     if search_matching:
 
@@ -251,14 +283,16 @@ def command_hello(_) -> None:
 def command_help(_) -> None:
     print('''
 "hello"                                 - greetings.
-"add <new_name> <new_phone(s)> and optionaly[<birthday>]" - adding a new contact.
+"add <new_name> <new_phone(s)> optionaly[<birthday>] optionaly[<email>]" 
+                                        - adding a new contact.
+"add address <name> <address>           - adding a contact's address.
 "add birth <name> <birthday>            - adding a contact's birthday (01.01.2000).
 "change <name> <old_phone> <new_phone>" - change the phone number of an existing contact.            
 "birth <name>"                          - show how many days are left until the next birthday.
 "del <name>"                            - remove contact from phonebook.
 "show all"                              - show all saved contacts with phone numbers.
 "phone <name>"                          - show phone numbers for an existing contact.
-"find <pattern>"                        - Finds contact data based on the entered pattern.
+"find <pattern>"                        - finds contact data based on the entered pattern.
 "good bye", "close", "exit"             - exit from the program. 
     ''')
 
@@ -384,23 +418,6 @@ def get_contact_phone(some_string: str) -> str:
     clear_data = normalize_msg(some_string)
     result = findall(r'(?:\+\d{2})?\d{3,4}\D?\d{3}\D?\d{3}', clear_data)
     return result
-    # data_lst = some_string.split()
-    #
-    # if len(data_lst) > 1:
-    #     phone_data = []
-    #
-    #     for data in data_lst[::-1]:
-    #         clear_data = normalize_msg(data)
-    #         if clear_data.isdigit() and len(clear_data) >= 10:
-    #             phone_data.insert(0, data)
-    #         elif clear_data.isdigit():
-    #             continue
-    #         else:
-    #             break
-    #
-    #     phones = ' '.join(phone_data)
-
-    # return phones
 
 
 @input_error
@@ -420,8 +437,9 @@ def get_record_for_print(record_data: tuple) -> str:
     phones = f' | phones: {", ".join(record_data[1])}' if record_data[1] else ''
     birthday = f' | birthday: {record_data[2]}' if record_data[2] else ''
     emails = f' | email: {", ".join(record_data[3])}' if record_data[3] else ''
+    address = f'\naddress: {record_data[4]}' if record_data[4] else ''
 
-    result = f'{name}{phones}{birthday}{emails}'
+    result = f'{name}{phones}{birthday}{emails}{address}'
 
     return result
 
@@ -434,7 +452,6 @@ def is_uniq_email(exist_record: Record, email: str) -> bool:
         if email == eml.value:
             return False
     return True
-
 
 
 def is_uniq_phone(exist_record: Record, phone: str) -> bool:
@@ -514,6 +531,7 @@ if __name__ == '__main__':
 
     phonebook = load_base(FILE_PATH)  #type: AddressBook
     PROGRAM_CMD = {
+        'add address': command_add_address,
         'add birth': command_add_birth, 
         'add': command_add, 
         'birth': command_birth,

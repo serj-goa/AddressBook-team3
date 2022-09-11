@@ -16,13 +16,9 @@ class AddressBook(UserDict):
             contact_phone = f' | phones: {", ".join(phones)}'
             contact_birth = f' | birthday: {record.birthday}' if record.birthday else ''
             contact_email = f' | email: {record.email}' if record.email else ''
+            contact_address = f'\naddress: {self.address}' if self.address else ''
 
-            result += f'{name}{contact_phone}{contact_birth}{contact_email}\n'
-
-            # if record.birthday:  #type: Birthday
-            #     result += f'Contact name: {name}, phones: {", ".join(phones)}, birthday: {record.birthday}\n'
-            # else:
-            #     result += f'Contact name: {name}, phones: {", ".join(phones)}\n'
+            result += f'{name}{contact_phone}{contact_birth}{contact_email}{contact_address}\n'
 
         return result
 
@@ -37,6 +33,7 @@ class AddressBook(UserDict):
             birth = record.birthday
             phones = []
             emails = []
+            addr = record.address
 
             for obj_phone in record.phone:  #type: List[Phone]
                 phones.append(obj_phone.value)  #type: str
@@ -45,7 +42,7 @@ class AddressBook(UserDict):
                 for obj_email in record.email:  #type: List[Email]
                     emails.append(obj_email.value)  #type: str
 
-            result = (name, phones, birth, emails)
+            result = (name, phones, birth, emails, addr)
 
             yield result
 
@@ -83,9 +80,16 @@ class Birthday(Field):
         return self.value.strftime('%d-%m-%Y')
 
 
+class Address(Field):
+    """
+    Class Address for storage address field
+    :params: value: str
+    """
+
+
 class Email(Field):
     """
-    Class Email for storage name's field
+    Class Email for storage emails field
     :params: value: str
     """
 
@@ -110,13 +114,18 @@ class Record:
     :params: Name: str
     :params: Phone: str
     :params: Birthday: datetime obj
+    :params: Email: str
+    :params: Address: str
     """
-    def __init__(self, name: Name, phone: Phone = None, birthday: Birthday = None, email: Email = None) -> None:
+    def __init__(self, name: Name, phone: Phone = None, birthday: Birthday = None,
+                 email: Email = None, address: Address = None) -> None:
+        self.__address = None
         self.__email = None
         self.__birthday = None
         self.__name = None
         self.__phone = None
 
+        self.address = address
         self.birthday = birthday
         self.email = email
         self.name = name
@@ -124,17 +133,21 @@ class Record:
 
     def __repr__(self) -> str:
         phones = [str(phone) for phone in self.phone]
-        
-        # if self.birthday:
-        #     return f'Phone: {", ".join(phones)}, Birthday: {self.birthday.value}'
-        #
-        # return f'Phone: {", ".join(phones)}'
 
         contact_birth = f' | birthday: {self.birthday}' if self.birthday else ''
         contact_email = f' | email: {self.email}' if self.email else ''
         contact_phone = f' | phones: {", ".join(phones)}'
+        contact_address = f'\naddress: {self.address}' if self.address else ''
 
-        return f'{self.name}{contact_phone}{contact_birth}{contact_email}'
+        return f'{self.name}{contact_phone}{contact_birth}{contact_email}{contact_address}'
+
+    @property
+    def address(self):
+        return self.__address
+
+    @address.setter
+    def address(self, address: Address):
+        self.__address = address
 
     @property
     def birthday(self):
@@ -157,7 +170,7 @@ class Record:
         return self.__name
 
     @name.setter
-    def name(self, name):
+    def name(self, name: Name):
         self.__name = name
 
     @property
@@ -167,6 +180,9 @@ class Record:
     @phone.setter
     def phone(self, phones: List[Phone]):
         self.__phone = phones
+
+    def add_address(self, addr: Address) -> None:
+        self.address = addr
 
     def add_birthday(self, birth: Birthday) -> None:
         self.birthday = birth
@@ -208,23 +224,11 @@ if __name__ == '__main__':
     serj_phone = [Phone('321432546')]
     serj_birth = Birthday('01011900')
     serj_email = [Email('addr@gmail.com')]
-    # print(serj_email.value)
-    rec_serj = Record(serj, serj_phone, serj_birth, serj_email)
+    serj_addr = Address('London, Baker Street')
 
-    # new_phone_1 = Phone('433465675')
-    # new_phone_2 = Phone('753367888')
-
-    # rec_serj.add_new_phone([new_phone_1, new_phone_2])
-    #
-    # print('rec_name: ', rec_serj.name.value)
-    # print('rec_phone: ', rec_serj.phone)
-    #
-    # rec_serj.change_phone(phone_indx=0, new_phone=Phone('11111111111'))
-    #
-    # print('\nrec_phone after deleting phone: ', rec_serj.phone)
-    # print('rec_phone after change: ', rec_serj.phone[0])
-
-    # book.add_record(record=rec_serj)  # phonebook[new_record.name.value] = new_record
+    rec_serj = Record(name=serj, phone=serj_phone, birthday=serj_birth,
+                      email=serj_email, address=serj_addr)
     book[rec_serj.name.value] = rec_serj
+
     print('\nbook: ', book.data)
     print(f'book values: {book.data["Serj"]}')
