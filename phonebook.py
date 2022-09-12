@@ -205,7 +205,10 @@ class Record:
         birth_month = self.__birthday.value.month
         birth_year = today.year
 
-        if today.month >= birth_month and today.day > birth_day:
+        if today.month == birth_month and today.day <= birth_day or today.month < birth_month:
+            birth_year = today.year
+
+        else:
             birth_year += 1
             
         next_year_birth = datetime(year=birth_year, month=birth_month, day=birth_day).date()
