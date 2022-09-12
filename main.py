@@ -1,3 +1,5 @@
+import clean
+
 from base import dump_base, load_base
 from birthlist import get_birthdays_per_week
 from phonebook import AddressBook, Address, Birthday, Email, Name, Phone, Record
@@ -220,6 +222,25 @@ def command_change(user_data_list: list) -> str:
                 record.change_phone(phone_indx=idx, new_phone=new_phone)
 
         return contact_name
+
+
+def command_clean(user_data_list: list):
+    user_message = get_message(user_data_list)  # type: str
+
+    if user_message:
+
+        try:
+            # path_argv = argv[1]
+            path_argv = Path(user_message)
+            print(f'path_argv: {path_argv}')
+        except IndexError:
+            print('Please add sorting path!')
+
+        if not Path(path_argv).is_dir():
+            print('Incorrect path. Please add valid path!')
+
+        else:
+            clean.main(path_argv)
 
 
 def command_close_program(_) -> str:
@@ -543,7 +564,8 @@ if __name__ == '__main__':
         'birth week': command_birth_week,
         'birth': command_birth,
         'change': command_change,
-        'del': command_del, 
+        'clean': command_clean,
+        'del': command_del,
         'find': command_find, 
         'phone': command_phone,
         'hello': command_hello,
