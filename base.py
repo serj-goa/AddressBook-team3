@@ -1,5 +1,5 @@
 from phonebook import AddressBook
-
+from Notes import Notes
 from pathlib import Path
 from pickle import load, dump
 
@@ -16,7 +16,7 @@ def dump_base(file_path: Path, db: dict) -> str:
     return 'Phonebook don`t saved.'
 
 
-def load_base(file_path: Path) -> AddressBook:
+def load_base(file_path: Path, dict=AddressBook()) -> AddressBook:
 
     if file_path.is_file():
 
@@ -26,7 +26,7 @@ def load_base(file_path: Path) -> AddressBook:
         return phonebook
 
     else:
-        return AddressBook()
+        return dict
 
 
 if __name__ == '__main__':

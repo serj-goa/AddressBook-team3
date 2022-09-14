@@ -1,9 +1,11 @@
+from tkinter.messagebox import NO
 from base import dump_base, load_base
 from phonebook import AddressBook, Birthday, Name, Phone, Record
 
 from pathlib import Path
 from typing import List
 
+from Notes import Notes
 
 def input_error(func):
     """
@@ -264,6 +266,12 @@ def command_help(_) -> None:
 "phone <name>"                          - show phone numbers for an existing contact.
 "find <pattern>"                        - Finds contact data based on the entered pattern.
 "good bye", "close", "exit"             - exit from the program. 
+"add note <notice>"                     - adding a notice
+"upd note <notice>"                     - update existing notice 
+"remove note"                           - remove existing notice
+"search note <notice>"                  - search notice
+"search tag"                            - displays notice(s) according to defined tag
+"sort <order>"                          - sort notice(s) according to defined tag ('asc'/'desc')
     ''')
 
 
@@ -492,7 +500,13 @@ if __name__ == '__main__':
     FILE_PATH = CURRENT_DIR / FILE_DB
 
     phonebook = load_base(FILE_PATH)  #type: AddressBook
+    
+    NOTE_DB = 'note_db.bin'
+    NOTE_PATH = CURRENT_DIR / NOTE_DB
+
+    book = load_base(NOTE_PATH, dict=Notes())
     PROGRAM_CMD = {
+        'add note': book.create_notice,
         'add birth': command_add_birth, 
         'add': command_add, 
         'birth': command_birth,
@@ -505,7 +519,12 @@ if __name__ == '__main__':
         'show all': command_show_all,
         'good bye': command_close_program,
         'close': command_close_program, 
-        'exit': command_close_program
+        'exit': command_close_program,
+        'upd note': book.upd_notice,
+        'remove note': book.del_notice,
+        'search note': book.search_notice,
+        'search tag': book.search_tag,
+        'sort': book.sorted
         }
 
     try:
@@ -516,3 +535,4 @@ if __name__ == '__main__':
         
     finally:
         print(dump_base(FILE_PATH, phonebook))
+        dump_base(NOTE_PATH, book)
