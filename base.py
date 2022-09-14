@@ -1,5 +1,5 @@
 from phonebook import AddressBook
-
+from Notes import Notes
 from pathlib import Path
 from pickle import load, dump
 
@@ -16,17 +16,17 @@ def dump_base(file_path: Path, db: dict) -> str:
     return 'Phonebook saved.'
 
 
-def load_base(file_path: Path) -> AddressBook:
+def load_base(file_path: Path, dict=AddressBook()) -> AddressBook:
 
     try:
         with open(file_path, 'rb') as fh:
             phonebook = load(fh)
 
     except FileNotFoundError:
-        return AddressBook()
+        return dict
 
     except EOFError:
-        return AddressBook()
+        return dict
 
     return phonebook
 
