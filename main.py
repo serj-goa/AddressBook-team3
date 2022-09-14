@@ -158,6 +158,34 @@ def command_add_birth(user_data_list: list) -> str:
 
 
 @input_error
+def command_add_email(user_data_list: list):
+    """
+    Adding a contact email.
+    """
+    user_message = get_message(user_data_list)  # type: str
+    contact_name = get_contact_name(user_message)  # type: str
+
+    if contact_name not in phonebook:
+        raise KeyError
+
+    emails = get_contact_email(user_message)  #type: list
+
+    if not emails:
+        print('Email must match the pattern <username@domein.com>')
+        raise ValueError
+
+    new_contact_emails = [Email(eml) for eml in emails]
+    exist_record = phonebook[contact_name]  #type: Record
+
+    if exist_record.email is None:
+        exist_record.email = new_contact_emails
+    else:
+        exist_record.add_email(new_contact_emails)
+
+    return contact_name
+
+
+@input_error
 def command_birth(user_data_list: list) -> None:
     """
     Calculates the number of days until the next birthday of an existing contact.
@@ -224,13 +252,52 @@ def command_change(user_data_list: list) -> str:
         return contact_name
 
 
+@input_error
+def command_change_email(user_data_list: list) -> str:
+    """
+    Change the email address of an existing contact in the phone book.
+    """
+    if not user_data_list[1]:
+        raise KeyError
+
+    user_message = get_message(user_data_list)  # type: str
+
+    if len(user_message.split()) < 2:
+        raise ValueError
+
+    contact_name = get_contact_name(user_message)  # type: str
+    email_data = get_contact_email(user_message)  # type: list
+    contact_email = email_data[0]  # type: str
+    new_contact_email = email_data[1]  # type: str
+
+    if not contact_name in phonebook:
+        raise KeyError
+
+    elif not contact_email:
+        raise ValueError
+
+    new_email = Email(new_contact_email)
+    record = phonebook[contact_name]  # type: Record
+
+    for idx, rec_email in enumerate(record.email):
+        if rec_email.value == contact_email:
+            record.change_email(email_indx=idx, new_email=new_email)
+
+            return contact_name
+
+    print(f'{contact_name} contact does not have this email {contact_email}.')
+    raise ValueError
+
+
 def command_clean(user_data_list: list):
+    """
+    Sorts files in a folder selected by the user.
+    """
     user_message = get_message(user_data_list)  # type: str
 
     if user_message:
 
         try:
-            # path_argv = argv[1]
             path_argv = Path(user_message)
             print(f'path_argv: {path_argv}')
         except IndexError:
@@ -248,6 +315,7 @@ def command_close_program(_) -> str:
     return 'quit'
 
 
+@input_error
 def command_del(user_data_list: list) -> str:
     """
     Remove contact from the phone book.
@@ -264,6 +332,40 @@ def command_del(user_data_list: list) -> str:
 
     else:
         raise KeyError
+
+
+@input_error
+def command_del_email(user_data_list: list) -> str:
+    """
+    Remove contact email from the phone book.
+    """
+    if not user_data_list[1]:
+        raise KeyError
+
+    user_message = get_message(user_data_list)  # type: str
+    contact_name = get_contact_name(user_message)  # type: str
+    email_data = get_contact_email(user_message)  # type: list
+    contact_email = email_data[0]  # type: str
+
+    if contact_name not in phonebook:
+        raise KeyError
+
+    record = phonebook[contact_name]  # type: Record
+
+    if not contact_email:
+        raise ValueError
+
+    if record.email is None:
+        raise ValueError
+
+    for idx, rec_email in enumerate(record.email):
+        if rec_email.value == contact_email:
+            record.delete_email(email_indx=idx)
+
+            return contact_name
+
+    print(f'{contact_name} contact does not have this email {contact_email}.')
+    raise ValueError
 
 
 def command_find(user_data_list: list):
@@ -426,7 +528,7 @@ def get_contact_name(some_string: str) -> str:
 
         for data in data_lst:
             clear_data = normalize_msg(data)
-            if clear_data.isdigit():
+            if clear_data.isdigit() or not clear_data.isalnum():
                 break
             name_data.append(data)
 
@@ -560,13 +662,16 @@ if __name__ == '__main__':
     PROGRAM_CMD = {
         'add address': command_add_address,
         'add birth': command_add_birth, 
-        'add': command_add, 
+        'add email': command_add_email,
+        'add': command_add,
         'birth week': command_birth_week,
         'birth': command_birth,
+        'change email': command_change_email,
         'change': command_change,
         'clean': command_clean,
+        'del email': command_del_email,
         'del': command_del,
-        'find': command_find, 
+        'find': command_find,
         'phone': command_phone,
         'hello': command_hello,
         'help': command_help,
