@@ -9,13 +9,18 @@ class AddressBook(UserDict):
 
         for name, record in self.data.items():  #type: str, Record
             phones = []
+            emails = []
 
             for obj_phone in record.phone:  #type: List[Phone]
                 phones.append(obj_phone.value)  #type: str
 
+            if record.email:
+                for obj_email in record.email:  #type: List[Email]
+                    emails.append(obj_email.value)  #type: str
+
             contact_phone = f' | phones: {", ".join(phones)}'
             contact_birth = f' | birthday: {record.birthday}' if record.birthday else ''
-            contact_email = f' | email: {record.email}' if record.email else ''
+            contact_email = f' | email: {", ".join(emails)}' if record.email else ''
             contact_address = f'\naddress: {self.address}' if self.address else ''
 
             result += f'{name}{contact_phone}{contact_birth}{contact_email}{contact_address}\n'
@@ -133,9 +138,10 @@ class Record:
 
     def __repr__(self) -> str:
         phones = [str(phone) for phone in self.phone]
+        emails = [str(email) for email in self.email]
 
         contact_birth = f' | birthday: {self.birthday}' if self.birthday else ''
-        contact_email = f' | email: {self.email}' if self.email else ''
+        contact_email = f' | email: {", ".join(emails)}' if self.email else ''
         contact_phone = f' | phones: {", ".join(phones)}'
         contact_address = f'\naddress: {self.address}' if self.address else ''
 
@@ -193,6 +199,9 @@ class Record:
     def add_new_phone(self, phones: List[Phone]) -> None:
         self.phone.extend(phones)
 
+    def change_email(self, email_indx: int, new_email: Email) -> None:
+        self.email[email_indx] = new_email
+
     def change_phone(self, phone_indx: int, new_phone: Phone) -> None:
         self.phone[phone_indx] = new_phone
 
@@ -215,6 +224,9 @@ class Record:
 
         days_to_birth = (next_year_birth - today).days
         return days_to_birth
+
+    def delete_email(self, email_indx: Email) -> None:
+        del self.email[email_indx]
 
     def delete_phone(self, remove_phone: Phone) -> None:
         self.phone.remove(remove_phone)
