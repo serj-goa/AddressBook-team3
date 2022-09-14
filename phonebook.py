@@ -18,7 +18,7 @@ class AddressBook(UserDict):
                 for obj_email in record.email:  #type: List[Email]
                     emails.append(obj_email.value)  #type: str
 
-            contact_phone = f' | phones: {", ".join(phones)}'
+            contact_phone = f' phones: {", ".join(phones)}'
             contact_birth = f' | birthday: {record.birthday}' if record.birthday else ''
             contact_email = f' | email: {", ".join(emails)}' if record.email else ''
             contact_address = f'\naddress: {self.address}' if self.address else ''
@@ -142,7 +142,7 @@ class Record:
 
         contact_birth = f' | birthday: {self.birthday}' if self.birthday else ''
         contact_email = f' | email: {", ".join(emails)}' if self.email else ''
-        contact_phone = f' | phones: {", ".join(phones)}'
+        contact_phone = f' phones: {", ".join(phones)}'
         contact_address = f'\naddress: {self.address}' if self.address else ''
 
         return f'{self.name}{contact_phone}{contact_birth}{contact_email}{contact_address}'
@@ -194,7 +194,7 @@ class Record:
         self.birthday = birth
 
     def add_email(self, email: Email) -> None:
-        self.email.append(email)
+        self.email.extend(email)
 
     def add_new_phone(self, phones: List[Phone]) -> None:
         self.phone.extend(phones)
@@ -228,8 +228,8 @@ class Record:
     def delete_email(self, email_indx: Email) -> None:
         del self.email[email_indx]
 
-    def delete_phone(self, remove_phone: Phone) -> None:
-        self.phone.remove(remove_phone)
+    def delete_phone(self, phone_indx: Phone) -> None:
+        del self.phone[phone_indx]
 
 
 if __name__ == '__main__':
