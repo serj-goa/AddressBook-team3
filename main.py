@@ -345,26 +345,69 @@ def command_del_email(user_data_list: list) -> str:
     user_message = get_message(user_data_list)  # type: str
     contact_name = get_contact_name(user_message)  # type: str
     email_data = get_contact_email(user_message)  # type: list
-    contact_email = email_data[0]  # type: str
 
     if contact_name not in phonebook:
         raise KeyError
 
     record = phonebook[contact_name]  # type: Record
 
-    if not contact_email:
+    if not email_data:
         raise ValueError
 
     if record.email is None:
         raise ValueError
 
+    flag = False
+    del_idx = []
     for idx, rec_email in enumerate(record.email):
-        if rec_email.value == contact_email:
-            record.delete_email(email_indx=idx)
+        for email in email_data:
+            if rec_email.value == email:
+                del_idx.append(idx)
+                flag = True
 
-            return contact_name
+    if flag:
+        for idx in del_idx[::-1]:
+            record.delete_email(email_indx=idx)
+        return contact_name
 
     print(f'{contact_name} contact does not have this email {contact_email}.')
+    raise ValueError
+
+
+@input_error
+def command_del_phone(user_data_list: list) -> str:
+    """
+    Remove contact phone from the phone book.
+    """
+    if not user_data_list[1]:
+        raise KeyError
+
+    user_message = get_message(user_data_list)  # type: str
+    contact_name = get_contact_name(user_message)  # type: str
+
+    if contact_name not in phonebook:
+        raise KeyError
+
+    phone_data = get_contact_phone(user_message)  # type: list
+    record = phonebook[contact_name]  # type: Record
+
+    if not phone_data:
+        raise ValueError
+
+    if record.phone is None:
+        raise ValueError
+
+    flag = False
+    for idx, rec_phone in enumerate(record.phone):
+        for phone in phone_data:
+            if rec_phone.value == phone:
+                record.delete_phone(phone_indx=idx)
+                flag = True
+
+    if flag:
+        return contact_name
+
+    print(f'{contact_name} contact does not have this phone {contact_phone}.')
     raise ValueError
 
 
@@ -540,7 +583,7 @@ def get_contact_name(some_string: str) -> str:
         raise IndexError
 
 
-def get_contact_phone(some_string: str) -> str:
+def get_contact_phone(some_string: str) -> list:
     """
     Getting the phone from the data transmitted by the user.
     """
@@ -563,7 +606,7 @@ def get_message(some_data: list) -> str:
 
 def get_record_for_print(record_data: tuple) -> str:
     name = record_data[0]
-    phones = f' | phones: {", ".join(record_data[1])}' if record_data[1] else ''
+    phones = f' phones: {", ".join(record_data[1])}' if record_data[1] else ''
     birthday = f' | birthday: {record_data[2]}' if record_data[2] else ''
     emails = f' | email: {", ".join(record_data[3])}' if record_data[3] else ''
     address = f'\naddress: {record_data[4]}' if record_data[4] else ''
@@ -670,6 +713,7 @@ if __name__ == '__main__':
         'change': command_change,
         'clean': command_clean,
         'del email': command_del_email,
+        'del phone': command_del_phone,
         'del': command_del,
         'find': command_find,
         'phone': command_phone,
