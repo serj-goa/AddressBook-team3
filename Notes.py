@@ -15,17 +15,17 @@ class Notes(UserDict):
                 break
            
             else:
-                print('Unexpected enter. Please try again')
+                print('Unexpected enter. Please try again\n')
         return tag        
     
     def create_notice(self, notice: list) -> None:
         tag = Notes.tag()
         if tag not in self.data:
             self.data[tag] = [notice[1]]
-            print(f'"{notice[1]}" was added successfully!')
+            print(f'"{notice[1]}" was added successfully!\n')
         else:
             self.data[tag].append(notice[1])
-            print(f'"{notice[1]}" was added successfully!')
+            print(f'"{notice[1]}" was added successfully!\n')
 
     
     def upd_notice(self, notice: list) -> None:
@@ -40,17 +40,17 @@ class Notes(UserDict):
                 
                 if type(int(number)) == int and 0 <= int(number) < len(self.data[tag]):
                     self.data[tag][int(number)] = notice[1]
-                    print (f'Notice: "{self.data[tag][int(number)]}" is updeted successfully!')
+                    print (f'Notice: "{self.data[tag][int(number)]}" is updeted successfully!\n')
                     break
                 
                 else:
-                    print('Wrong input!')
+                    print('Wrong input!\n')
         
         elif tag in self.data and len(self.data.get(tag)) == 0:
-            print('There are no notices')
+            print('There are no notices\n')
         
         else:
-            print(f'Relevant data wasn\'t found')
+            print(f'Relevant data wasn\'t found\n')
 
     def del_notice(self, number: str) -> None:
         tag = Notes.tag()
@@ -62,17 +62,17 @@ class Notes(UserDict):
                 number = input('Enter number of notice should be removed: ')
                 
                 if type(int(number)) == int and 0 <= int(number) < len(self.data[tag]):
-                    print (f'Notice: "{self.data[tag].pop(int(number))}" was removed successfully!')
+                    print(f'Notice: "{self.data[tag].pop(int(number))}" was removed successfully!\n')
                     break
                 
                 else:
-                    print('Wrong input!')
+                    print('Wrong input!\n')
         
         elif tag in self.data and len(self.data.get(tag)) == 0:
-            print('There are no notices')
+            print('There are no notices\n')
        
         else:
-            print(f'Relevant data wasn\'t found')
+            print(f'Relevant data wasn\'t found\n')
         
     def search_notice(self, notice: str) -> None:
         flag = True
@@ -84,7 +84,7 @@ class Notes(UserDict):
                     flag = False
                     print(i)
         if flag:
-            print('Relevant data wasn\'t found')
+            print('Relevant data wasn\'t found\n')
 
     def search_tag(self, tag: str) -> None:
         tag=Notes.tag()
@@ -96,14 +96,14 @@ class Notes(UserDict):
                 print(f'Notice {counter}: "{notice}"')
         
         elif tag in self.data and bool(self.data[tag])==False:
-            print('There are no notices')
+            print('There are no notices\n')
         
         else:
-            print(f'Relevant data wasn\'t found')
+            print(f'Relevant data wasn\'t found\n')
     
     def sorted(self, order: list) -> None:
         if order[1].lower() != 'asc' and order[1].lower() != 'desc':
-            print('Only "asc" and "desc" order is available')
+            print('Only "asc" and "desc" order is available\n')
             return None
 
         tag = Notes.tag()
@@ -121,10 +121,10 @@ class Notes(UserDict):
 
             
         elif tag in self.data and bool(self.data[tag]) == False:
-            print('There are no notices')
+            print('There are no notices\n')
        
         else:
-            print(f'Relevant data wasn\'t found')
+            print(f'Relevant data wasn\'t found\n')
 
 
 if __name__ == '__main__':
