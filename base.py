@@ -1,32 +1,34 @@
 from phonebook import AddressBook
-
+from Notes import Notes
 from pathlib import Path
 from pickle import load, dump
 
 
 def dump_base(file_path: Path, db: dict) -> str:
 
-    if file_path.is_file():
-
+    try:
         with open(file_path, 'wb') as fh:
             dump(db, fh)
 
-        return 'Phonebook saved.'
+    except Exception as error:
+        return error
 
-    return 'Phonebook don`t saved.'
+    return 'Phonebook saved.'
 
 
-def load_base(file_path: Path) -> AddressBook:
+def load_base(file_path: Path, dict=AddressBook()) -> AddressBook:
 
-    if file_path.is_file():
-
+    try:
         with open(file_path, 'rb') as fh:
             phonebook = load(fh)
 
-        return phonebook
+    except FileNotFoundError:
+        return dict
 
-    else:
-        return AddressBook()
+    except EOFError:
+        return dict
+
+    return phonebook
 
 
 if __name__ == '__main__':

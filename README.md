@@ -1,23 +1,27 @@
-      Інструкція по роботі з "Персональним помічником"
+# AddressBook-team3
 
-          Можливості "Персонального помічника":
-- зберігати контакти з іменами, адресами, номерами телефонів, email
-  до книги контактів
-- перевіряти дні народження ваших контактів у заданому періоді часу
-- створювати, видаляти та змінювати ваші нотатки
-- сортувати файли у зазначеній папці за категоріями
+## CLI Bot "Personal assistant"
 
-          Робота з програмою
 
-"help" - список команд
-"hello"  - вітання
-"add <new_name> <new_phone(s)> and optionaly[<birthday>]" - додати новий контакт
-"add birth <name> <birthday> - додати день народження в контакт(01.01.2000).
-"change <name> <old_phone> <new_phone>" - змінити телефон вже існуючого контакту       
-"birth <name>" - вивести кількість днів до дня народження
-"del <name>" - видалити контакт
-"show all" - показати ім'я та номер телефону всіх контактів
-"phone <name>" - показати номер телефону
-"find <pattern>" - знайти контакт
-"sort folder" - сортування файлів у заданій папці
-"good bye", "close", "exit" - завершення роботи помічника 
+Bot commands:
+
+* "hello"                                     - greetings.
+* "add <**new_name**> <**new_phone(s)**> optionaly[<*birthday*>] optionaly[<*email*>]" - adding a new contact.
+* "add address <**name**> <**address**>       - adding a contact's address.
+* "add birth <**name**> <**birthday**>        - adding a contact's birthday (01.01.2000).
+* "add email <**email**>                      - adding a contact's email.
+* "change <**name**> <**old_phone**> <**new_phone**>" - change the phone number of an existing contact.            
+* "birth <**name>**"                          - show how many days are left until the next birthday.
+* "del <**name**>"                            - remove contact from phonebook.
+* "del phone <**phone**>"                     - remove contact phone from phonebook.
+* "del email <**email**>"                     - remove contact email from phonebook.
+* "show all"                                  - show all saved contacts with phone numbers.
+* "phone <**name**>"                          - show phone numbers for an existing contact.
+* "find <**pattern**>"                        - finds contact data based on the entered pattern.
+* "good bye", "**close**", "**exit**"         - exit from the program. 
+* "add note <**notice**>"                     - adding a notice
+* "upd note <**notice**>"                     - update existing notice 
+* "remove note"                               - remove existing notice
+* "search note <**notice**>"                  - search notice
+* "search tag"                                - displays notice(s) according to defined tag
+* "sort <**order**>"                          - sort notice(s) according to defined tag ('asc'/'desc')
